@@ -14,6 +14,8 @@ const baseJob: Job = {
   createdAt: Date.now(),
 };
 
+const chatJob: Job = { ...baseJob, kind: 'chat', prompt: 'Hi.' };
+
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -73,5 +75,52 @@ describe('worker', () => {
     expect(estimateTokens('abcd')).toBe(1);
     expect(estimateTokens('a'.repeat(100))).toBe(25);
     expect(estimateTokens('')).toBe(1);
+  });
+
+  it('LM Studio: chat jobs hit /v1/chat/completions', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse({
+        choices: [{ message: { content: 'hello back' } }],
+        usage: { prompt_tokens: 1, completion_tokens: 2 },
+      }),
+    );
+    const r = await runJob(chatJob, {
+      runtime: 'lm-studio',
+      baseUrl: 'http://127.0.0.1:1234',
+      nodeId: 'NODE #LM',
+    });
+    expect(r.output).toBe('hello back');
+    expect(r.tokensIn).toBe(1);
+    expect(r.tokensOut).toBe(2);
+    const req = fetchSpy.mock.calls[0]?.[0];
+    expect(String(req)).toContain('/v1/chat/completions');
+  });
+
+  it('LM Studio: completion jobs hit /v1/completions', async () => {
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse({
+        choices: [{ text: '1 2 3' }],
+        usage: { prompt_tokens: 3, completion_tokens: 4 },
+      }),
+    );
+    const r = await runJob(baseJob, {
+      runtime: 'lm-studio',
+      baseUrl: 'http://127.0.0.1:1234',
+      nodeId: 'NODE #LM',
+    });
+    expect(r.output).toBe('1 2 3');
+    const req = fetchSpy.mock.calls[0]?.[0];
+    expect(String(req)).toContain('/v1/completions');
+  });
+
+  it('LM Studio: non-2xx throws with the body snippet', async () => {
+    fetchSpy.mockResolvedValueOnce(new Response('kaboom', { status: 500 }));
+    await expect(
+      runJob(baseJob, {
+        runtime: 'lm-studio',
+        baseUrl: 'http://127.0.0.1:1234',
+        nodeId: 'NODE #LM',
+      }),
+    ).rejects.toThrow(/HTTP 500/);
   });
 });

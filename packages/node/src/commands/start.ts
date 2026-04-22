@@ -12,7 +12,7 @@ import type { Keypair } from '@solana/web3.js';
 export async function startCmd(opts: { foreground: boolean }): Promise<void> {
   log.banner([
     '',
-    '  D O Z Z Z E  ::  NODE  ::  v0.2.0',
+    '  D O Z Z Z E  ::  NODE  ::  v0.3.0',
     '  Idle compute, awake.',
     '',
   ]);
@@ -54,6 +54,15 @@ export async function startCmd(opts: { foreground: boolean }): Promise<void> {
     log.ok(`runtime ${r.name} up @ ${r.url} (${r.models.length} models)`);
   }
 
+  // Pick the first running runtime as our target. Ollama wins by default
+  // since it comes first in detectAll's output; users who prefer LM Studio
+  // can shut down Ollama or edit config.
+  const chosen = running[0]!;
+  const routerRuntime: { kind: 'ollama' | 'lm-studio'; baseUrl: string } = {
+    kind: chosen.name,
+    baseUrl: chosen.url,
+  };
+
   // If on-chain settlement is opted in, we need a live keypair. Prefer
   // DOZZZE_WALLET_PASSWORD for unattended runs; fall back to a TTY prompt.
   let settlementKeypair: Keypair | undefined;
@@ -80,6 +89,7 @@ export async function startCmd(opts: { foreground: boolean }): Promise<void> {
   const handle = startRouter({
     config,
     nodeId: config.nodeId,
+    runtime: routerRuntime,
     ...(settlementKeypair ? { settlementKeypair } : {}),
   });
 

@@ -9,8 +9,9 @@ import { configCmd } from './commands/config.js';
 import { walletCmd } from './commands/wallet.js';
 import { statusCmd } from './commands/status.js';
 import { doctorCmd } from './commands/doctor.js';
+import { askCmd } from './commands/ask.js';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 const program = new Command();
 
@@ -68,6 +69,30 @@ program
   .action(async (action: string) => {
     await walletCmd(action);
   });
+
+program
+  .command('ask')
+  .description('Submit a prompt to the coordinator and print the result.')
+  .argument('<prompt...>', 'The prompt to send (quote it if it has spaces)')
+  .option('-m, --model <name>', 'Model name the node should use', 'llama3.2')
+  .option('-t, --timeout <ms>', 'Max ms to wait for a result', '120000')
+  .option('-p, --payout <n>', 'Max $DOZZZE you are willing to pay', '0.01')
+  .option('-c, --coord <url>', 'Override coordinator URL from config')
+  .option('--json', 'Print the raw Result as JSON instead of a friendly summary', false)
+  .action(
+    async (
+      promptWords: string[],
+      opts: {
+        model: string;
+        timeout: string;
+        payout: string;
+        coord?: string;
+        json: boolean;
+      },
+    ) => {
+      await askCmd(promptWords.join(' '), opts);
+    },
+  );
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   const msg = err instanceof Error ? err.message : String(err);

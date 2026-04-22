@@ -6,7 +6,7 @@ import type { Config } from './config.js';
 import type { Job, Result } from './protocol.js';
 import { startMockCoordinator } from './coordinator-mock.js';
 import { reportResult, startHttpCoordinator } from './coordinator-http.js';
-import { runJob } from './worker.js';
+import { runJob, type RuntimeKind } from './worker.js';
 import { makeConnection, settleOnChain } from './settlement.js';
 import type { Keypair } from '@solana/web3.js';
 import * as log from './logger.js';
@@ -18,6 +18,8 @@ export interface RouterDeps {
   onResult?: (r: Result) => void;
   /** If provided + settlement enabled, Results are memoed on-chain via this keypair. */
   settlementKeypair?: Keypair;
+  /** Which local runtime to route jobs to. Defaults to Ollama. */
+  runtime?: { kind: RuntimeKind; baseUrl: string };
 }
 
 export interface RouterHandle {
@@ -28,16 +30,20 @@ export interface RouterHandle {
 export function startRouter(deps: RouterDeps): RouterHandle {
   const { config, nodeId, onResult, settlementKeypair } = deps;
   const mode = config.coordinator.mode;
+  const runtime = deps.runtime ?? { kind: 'ollama' as const, baseUrl: config.ollamaUrl };
 
   const settlementConn = config.settlement.enabled
     ? makeConnection(config.settlement.cluster, config.settlement.rpcUrl)
     : null;
 
+  log.info(`routing jobs to ${runtime.kind} @ ${runtime.baseUrl}`);
+
   const handleJob = async (job: Job): Promise<void> => {
     log.info(`job received ${job.id.slice(0, 8)} model=${job.model}`);
     try {
       let result = await runJob(job, {
-        ollamaUrl: config.ollamaUrl,
+        runtime: runtime.kind,
+        baseUrl: runtime.baseUrl,
         nodeId,
       });
 
