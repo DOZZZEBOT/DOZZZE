@@ -1,17 +1,23 @@
-// Wires the coordinator (mock or real) to the worker. This is the thing
-// `dozzze start` actually runs.
+// Wires the coordinator (mock or real HTTP) to the worker, optionally
+// settling every Result on Solana devnet. This is the thing `dozzze start`
+// actually runs.
 
 import type { Config } from './config.js';
 import type { Job, Result } from './protocol.js';
 import { startMockCoordinator } from './coordinator-mock.js';
+import { reportResult, startHttpCoordinator } from './coordinator-http.js';
 import { runJob } from './worker.js';
+import { makeConnection, settleOnChain } from './settlement.js';
+import type { Keypair } from '@solana/web3.js';
 import * as log from './logger.js';
 
 export interface RouterDeps {
   config: Config;
   nodeId: string;
-  /** Called every time a Result is produced. MVP: just logs. v0.2: settle on-chain. */
+  /** Called every time a Result is produced. MVP: no-op. v0.2: HTTP report. */
   onResult?: (r: Result) => void;
+  /** If provided + settlement enabled, Results are memoed on-chain via this keypair. */
+  settlementKeypair?: Keypair;
 }
 
 export interface RouterHandle {
@@ -20,28 +26,59 @@ export interface RouterHandle {
 
 /** Boots the router loop. Returns a handle to stop it. */
 export function startRouter(deps: RouterDeps): RouterHandle {
-  const { config, nodeId, onResult } = deps;
+  const { config, nodeId, onResult, settlementKeypair } = deps;
+  const mode = config.coordinator.mode;
+
+  const settlementConn = config.settlement.enabled
+    ? makeConnection(config.settlement.cluster, config.settlement.rpcUrl)
+    : null;
 
   const handleJob = async (job: Job): Promise<void> => {
     log.info(`job received ${job.id.slice(0, 8)} model=${job.model}`);
     try {
-      const result = await runJob(job, {
+      let result = await runJob(job, {
         ollamaUrl: config.ollamaUrl,
         nodeId,
       });
+
+      // Optional on-chain settlement. Best-effort — we still log the Result
+      // and report it back to the coordinator even if settlement fails.
+      if (settlementConn && settlementKeypair && config.settlement.enabled) {
+        try {
+          const tx = await settleOnChain(result, {
+            connection: settlementConn,
+            keypair: settlementKeypair,
+          });
+          result = { ...result, settlementTx: tx };
+          log.ok(`settled on ${config.settlement.cluster}: ${tx.slice(0, 12)}…`);
+        } catch (e) {
+          log.warn(`settlement failed (result still logged): ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+
       log.ok(
         `inference done ${result.jobId.slice(0, 8)} ` +
           `tokens=${result.tokensIn}+${result.tokensOut} ` +
           `${result.durationMs}ms ` +
-          `paid ${log.em(result.payout.toFixed(4))} $DOZZZE (mock)`,
+          `paid ${log.em(result.payout.toFixed(4))} $DOZZZE` +
+          (result.settlementTx ? ` (tx ${result.settlementTx.slice(0, 8)}…)` : ' (mock)'),
       );
+
+      if (mode === 'http') {
+        try {
+          await reportResult(config.coordinator.url, result);
+        } catch (e) {
+          log.warn(`coordinator report failed: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+
       onResult?.(result);
     } catch (e) {
       log.err(`job ${job.id.slice(0, 8)} failed: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
-  if (config.coordinator.mode === 'mock') {
+  if (mode === 'mock') {
     log.info(`mock coordinator: 1 job every ${(config.pollIntervalMs / 1000).toFixed(0)}s`);
     const stop = startMockCoordinator({
       intervalMs: config.pollIntervalMs,
@@ -50,9 +87,13 @@ export function startRouter(deps: RouterDeps): RouterHandle {
     return { stop };
   }
 
-  // Real coordinator is a v0.2 concern — surface a clear error so nobody trips
-  // over it thinking it works.
-  throw new Error(
-    'Coordinator mode "http" is not implemented yet. Set coordinator.mode="mock" in config.json.',
-  );
+  log.info(`http coordinator: polling ${config.coordinator.url} every ${(config.pollIntervalMs / 1000).toFixed(0)}s`);
+  const stop = startHttpCoordinator({
+    url: config.coordinator.url,
+    nodeId,
+    intervalMs: config.pollIntervalMs,
+    onJob: handleJob,
+    onError: (err) => log.warn(`coordinator poll: ${err.message}`),
+  });
+  return { stop };
 }

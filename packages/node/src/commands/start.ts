@@ -2,15 +2,17 @@
 import { loadConfig, configExists, saveConfig, defaultConfig } from '../config.js';
 import { detectAll } from '../detector.js';
 import * as log from '../logger.js';
-import { walletExists, peekWallet } from '../wallet.js';
+import { walletExists, peekWallet, unlockWallet } from '../wallet.js';
+import { askPassword } from '../prompt.js';
 import { startRouter } from '../router.js';
 import { writePid, clearPid } from '../pid.js';
+import type { Keypair } from '@solana/web3.js';
 
 /** Start the node. Creates a default config on first run. */
 export async function startCmd(opts: { foreground: boolean }): Promise<void> {
   log.banner([
     '',
-    '  D O Z Z Z E  ::  NODE  ::  v0.1.0',
+    '  D O Z Z Z E  ::  NODE  ::  v0.2.0',
     '  Idle compute, awake.',
     '',
   ]);
@@ -52,11 +54,34 @@ export async function startCmd(opts: { foreground: boolean }): Promise<void> {
     log.ok(`runtime ${r.name} up @ ${r.url} (${r.models.length} models)`);
   }
 
+  // If on-chain settlement is opted in, we need a live keypair. Prefer
+  // DOZZZE_WALLET_PASSWORD for unattended runs; fall back to a TTY prompt.
+  let settlementKeypair: Keypair | undefined;
+  if (config.settlement.enabled) {
+    if (!walletExists()) {
+      log.err('settlement is enabled but no wallet exists. Run `dozzze wallet create`.');
+      process.exit(2);
+    }
+    const envPw = process.env['DOZZZE_WALLET_PASSWORD'];
+    try {
+      const pw = envPw ?? (await askPassword('wallet password (settlement enabled): '));
+      settlementKeypair = await unlockWallet(pw);
+      log.ok(`wallet unlocked — settling every result on ${config.settlement.cluster}`);
+    } catch (e) {
+      log.err(`wallet unlock failed: ${e instanceof Error ? e.message : String(e)}`);
+      process.exit(4);
+    }
+  }
+
   if (!opts.foreground) {
     await writePid();
   }
 
-  const handle = startRouter({ config, nodeId: config.nodeId });
+  const handle = startRouter({
+    config,
+    nodeId: config.nodeId,
+    ...(settlementKeypair ? { settlementKeypair } : {}),
+  });
 
   const shutdown = (signal: string): void => {
     log.warn(`received ${signal} — shutting down.`);

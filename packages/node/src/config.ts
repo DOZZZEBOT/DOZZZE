@@ -22,13 +22,23 @@ export const ConfigSchema = z.object({
   dailyBudgetUsd: z.number().nonnegative().default(0),
   /** Whether to accept jobs when no wallet exists yet. MVP logs payouts; no on-chain. */
   requireWallet: z.boolean().default(true),
-  /** Where the coordinator lives (v0.2 will flip this to a real URL). */
+  /** Where the coordinator lives. `mock` fires synthetic jobs in-process; `http`
+   *  polls a real coordinator URL (@dozzze/coordinator or compatible). */
   coordinator: z
     .object({
       mode: z.enum(['mock', 'http']).default('mock'),
-      url: z.string().url().optional(),
+      url: z.string().url().default('http://127.0.0.1:8787'),
     })
-    .default({ mode: 'mock' }),
+    .default({ mode: 'mock', url: 'http://127.0.0.1:8787' }),
+  /** Optional Solana devnet settlement: sign a memo tx for every Result. */
+  settlement: z
+    .object({
+      enabled: z.boolean().default(false),
+      cluster: z.enum(['devnet', 'testnet', 'mainnet-beta']).default('devnet'),
+      /** RPC URL override. Defaults to the canonical public RPC for `cluster`. */
+      rpcUrl: z.string().url().optional(),
+    })
+    .default({ enabled: false, cluster: 'devnet' }),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

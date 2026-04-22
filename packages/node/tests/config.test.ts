@@ -62,4 +62,26 @@ describe('config', () => {
     const r = ConfigSchema.safeParse({ cluster: 'sepolia' });
     expect(r.success).toBe(false);
   });
+
+  it('coordinator defaults to mock mode with a localhost URL', () => {
+    const cfg = defaultConfig();
+    expect(cfg.coordinator.mode).toBe('mock');
+    expect(cfg.coordinator.url).toBe('http://127.0.0.1:8787');
+  });
+
+  it('settlement is disabled by default on devnet', () => {
+    const cfg = defaultConfig();
+    expect(cfg.settlement.enabled).toBe(false);
+    expect(cfg.settlement.cluster).toBe('devnet');
+  });
+
+  it('accepts settlement + coordinator overrides via patchConfig', async () => {
+    await saveConfig(defaultConfig());
+    const updated = await patchConfig({
+      coordinator: { mode: 'http', url: 'https://coord.example.com' },
+      settlement: { enabled: true, cluster: 'devnet' },
+    });
+    expect(updated.coordinator.mode).toBe('http');
+    expect(updated.settlement.enabled).toBe(true);
+  });
 });
