@@ -8,17 +8,21 @@
 
 ---
 
-## What this repo is (today)
+## What this repo is (today, v0.2)
 
-This is the **v0.1 MVP** of the DOZZZE node client. It runs locally, detects a
-local LLM runtime (Ollama or LM Studio), and — with a **mocked coordinator** —
-fires a fake inference job every 30 seconds, runs it through your runtime, and
-prints a fake `$DOZZZE` payout.
+Three workspaces:
 
-Everything on the landing page that isn't in this repo is **not implemented
-yet**. The docs will always tell you honestly what works and what doesn't. See
-[`docs/architecture.md`](./docs/architecture.md) §3 for the exact "deliberately
-missing" list.
+- **`@dozzze/sdk`** — zod schemas shared by every component. Wire protocol lives here.
+- **`@dozzze/coordinator`** — Hono HTTP broker. `POST /submit`, `GET /poll/:nodeId`, `POST /report`, `GET /result/:jobId`. In-memory FIFO queue.
+- **`@dozzze/node`** — the worker + CLI. Either runs a self-contained mock loop or polls a real coordinator.
+
+v0.2 adds: a real HTTP coordinator (not the in-process mock), a real Solana devnet
+memo settlement path (opt-in), and the ability for multiple nodes to share one
+coordinator. Subscription bridging, SPL token settlement, and consumer dashboards
+are still v0.3+.
+
+See [`docs/architecture.md`](./docs/architecture.md) for the exact "live vs. missing"
+list and the component map.
 
 ## Quick install (Unix-ish)
 
@@ -70,7 +74,61 @@ dozzze doctor      # deeper env check; exit 0 if healthy
 dozzze config      # show | get <key> | set <key> <value> | path
 dozzze wallet      # create | show | import | verify
 dozzze --help      # all of the above, commander-style
+
+# Run a coordinator (v0.2)
+npm run coord      # or: node packages/coordinator/dist/cli.js
+dozzze-coord --port 8787 --host 127.0.0.1
 ```
+
+## Run a full mesh locally (v0.2)
+
+```bash
+# Terminal A — coordinator
+npm run build
+npm run coord
+
+# Terminal B — a node
+npm run dozzze -- config set coordinator '{"mode":"http","url":"http://127.0.0.1:8787"}'
+npm run dozzze -- wallet create
+ollama serve          # in a third terminal
+npm run dozzze -- start
+
+# Terminal C — a consumer
+curl -X POST http://127.0.0.1:8787/submit \
+  -H 'content-type: application/json' \
+  -d '{"protocolVersion":1,"kind":"completion","model":"llama3.2","prompt":"Hello","payout":0.01}'
+
+# fetch the result the node produced
+curl http://127.0.0.1:8787/result/<jobId>
+```
+
+Or run the scripted end-to-end demo (no Ollama required, coordinator + curl only):
+
+```bash
+bash scripts/demo.sh   # needs jq on PATH
+```
+
+## Solana devnet settlement (opt-in)
+
+v0.2 can memo every completed Result to Solana devnet as a `dozzze:v1:...` payload.
+**Off by default.** To enable:
+
+```bash
+dozzze config set settlement '{"enabled":true,"cluster":"devnet"}'
+dozzze wallet create          # must have a wallet (funded with devnet airdrop)
+# either paste the password at the `dozzze start` prompt,
+# or export DOZZZE_WALLET_PASSWORD=... for unattended runs
+dozzze start
+```
+
+Fund the wallet on devnet:
+
+```
+solana airdrop 1 <address> --url https://api.devnet.solana.com
+```
+
+Every Result then carries `settlementTx: <signature>` you can verify on
+[`explorer.solana.com`](https://explorer.solana.com/?cluster=devnet).
 
 ## Config
 

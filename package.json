@@ -1,21 +1,24 @@
 {
   "name": "dozzze",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "DOZZZE — idle compute enhancer, MVP workspaces root",
   "license": "Apache-2.0",
   "workspaces": [
-    "packages/*"
+    "packages/sdk",
+    "packages/coordinator",
+    "packages/node"
   ],
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build -w @dozzze/sdk && npm run build -w @dozzze/coordinator && npm run build -w @dozzze/node",
+    "test": "npm run build -w @dozzze/sdk && npm run test --workspaces --if-present",
+    "typecheck": "npm run build -w @dozzze/sdk && npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "dozzze": "npm run dozzze --workspace packages/node --"
+    "dozzze": "npm run dozzze --workspace packages/node --",
+    "coord": "npm run dev --workspace packages/coordinator --"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

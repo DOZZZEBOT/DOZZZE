@@ -10,7 +10,7 @@ import { walletCmd } from './commands/wallet.js';
 import { statusCmd } from './commands/status.js';
 import { doctorCmd } from './commands/doctor.js';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 const program = new Command();
 
