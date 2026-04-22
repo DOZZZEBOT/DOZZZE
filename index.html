@@ -1538,69 +1538,102 @@
                     <div class="install-tab active" data-tab="sh" onclick="switchTab('sh')">
                         <span class="tab-icon">▸</span>macOS / Linux
                     </div>
+                    <div class="install-tab" data-tab="source" onclick="switchTab('source')">
+                        <span class="tab-icon">▸</span>Windows / Source
+                    </div>
                     <div class="install-tab" data-tab="docker" onclick="switchTab('docker')">
                         <span class="tab-icon">▸</span>Docker
                     </div>
-                    <div class="coming-soon-chip">● IN PROGRESS · OPEN SOURCE</div>
+                    <div class="coming-soon-chip">● v0.1.0 · OPEN SOURCE · LIVE</div>
                 </div>
 
                 <div class="install-panel active" data-panel="sh">
                     <div class="install-headline">
-                        <h3>Node Client (Planned)</h3>
-                        <span class="install-meta">One command to connect · no signup needed</span>
+                        <h3>Node Client</h3>
+                        <span class="install-meta">One command to install · then three to start earning</span>
                     </div>
                     <div class="install-code">
-                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><span class="prompt-sym">$</span> curl -fsSL <span class="cmd-string">dozzze.xyz/install.sh</span> | sh
+<button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><span class="prompt-sym">$</span> curl -fsSL <span class="cmd-string">https://raw.githubusercontent.com/DOZZZEBOT/DOZZZE/main/scripts/install.sh</span> | sh
+<span class="prompt-sym">$</span> dozzze doctor           <span class="cmd-comment"># verify environment</span>
+<span class="prompt-sym">$</span> dozzze wallet create    <span class="cmd-comment"># creates encrypted Solana keystore</span>
+<span class="prompt-sym">$</span> dozzze start            <span class="cmd-comment"># light it up</span>
                     </div>
                     <div class="install-promises">
                         <div class="promise">
                             <span class="promise-mark">▸</span>
-                            <span>Auto-detects local <strong>Ollama / LM Studio</strong> and taps idle compute</span>
+                            <span>Auto-detects local <strong>Ollama / LM Studio</strong> and runs jobs on your idle GPU</span>
                         </div>
                         <div class="promise">
                             <span class="promise-mark">▸</span>
-                            <span>Your <strong>wallet address</strong> is your identity — no email, no phone</span>
+                            <span>Your <strong>Solana wallet</strong> is your identity — scrypt + AES-256-GCM on disk. No email. No KYC.</span>
                         </div>
                         <div class="promise">
                             <span class="promise-mark">▸</span>
-                            <span>One command to <strong>uninstall anytime</strong>:<code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">dozzze uninstall</code></span>
+                            <span>Stop any time with <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">dozzze stop</code>; uninstall by deleting <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">~/.dozzze/</code></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="install-panel" data-panel="source">
+                    <div class="install-headline">
+                        <h3>From Source · any OS</h3>
+                        <span class="install-meta">Windows-friendly · or if you just want to read the code first</span>
+                    </div>
+                    <div class="install-code">
+<button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><span class="prompt-sym">$</span> git clone <span class="cmd-string">https://github.com/DOZZZEBOT/DOZZZE.git</span>
+<span class="prompt-sym">$</span> cd DOZZZE &amp;&amp; npm install &amp;&amp; npm run build
+<span class="prompt-sym">$</span> npm run dozzze -- doctor
+<span class="prompt-sym">$</span> npm run dozzze -- wallet create
+<span class="prompt-sym">$</span> npm run dozzze -- start
+                    </div>
+                    <div class="install-promises">
+                        <div class="promise">
+                            <span class="promise-mark">▸</span>
+                            <span>Requires <strong>Node.js 20+</strong>, <strong>npm</strong>, and an <strong>Ollama</strong> server on localhost:11434</span>
+                        </div>
+                        <div class="promise">
+                            <span class="promise-mark">▸</span>
+                            <span><strong>36 unit tests</strong> ship with the repo — run <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">npm test</code> before trusting the binary</span>
+                        </div>
+                        <div class="promise">
+                            <span class="promise-mark">▸</span>
+                            <span>Apache-2.0. Fork it, break it, ship it. Just don't rug anyone.</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="install-panel" data-panel="docker">
                     <div class="install-headline">
-                        <h3>Docker Background Node (Planned)</h3>
-                        <span class="install-meta">For servers, NAS, spare Mac mini</span>
+                        <h3>Docker Background Node</h3>
+                        <span class="install-meta">For servers, NAS, spare Mac mini · builds from repo</span>
                     </div>
                     <div class="install-code">
-<button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><span class="prompt-sym">$</span> docker run -d --name dozzze \
-    -e <span class="cmd-accent">WALLET</span>=<span class="cmd-string">"your_sol_address"</span> \
-    -v ~/.ollama:/root/.ollama \
-    <span class="cmd-string">dozzze/node:latest</span>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copy</button><span class="prompt-sym">$</span> git clone <span class="cmd-string">https://github.com/DOZZZEBOT/DOZZZE.git</span> &amp;&amp; cd DOZZZE
+<span class="prompt-sym">$</span> docker compose -f <span class="cmd-string">docker/docker-compose.yml</span> up -d --build
+<span class="prompt-sym">$</span> docker compose -f <span class="cmd-string">docker/docker-compose.yml</span> exec dozzze dozzze wallet create
                     </div>
                     <div class="install-promises">
                         <div class="promise">
                             <span class="promise-mark">▸</span>
-                            <span>Runs 24/7 in the background — <strong>mine around the clock</strong>, no interruption</span>
+                            <span>Runs 24/7 in the background — node-alpine image, non-root user</span>
                         </div>
                         <div class="promise">
                             <span class="promise-mark">▸</span>
-                            <span>Auto-bridges Ollama models already on your machine</span>
+                            <span>Talks to <strong>host Ollama</strong> via <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">host.docker.internal</code>; or uncomment the sidecar in compose for a self-contained stack</span>
                         </div>
                         <div class="promise">
                             <span class="promise-mark">▸</span>
-                            <span>Supports <strong>GPU passthrough</strong>: NVIDIA / Apple Silicon / AMD ROCm</span>
+                            <span>Keystore persists in a named volume; survives container rebuilds</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="install-notice">
-                    <div class="notice-mark">⚠</div>
+                    <div class="notice-mark">●</div>
                     <div class="notice-body">
-                        <strong>This is a preview of the planned form — the commands above don't run yet.</strong>
-                        The node client will be <strong>fully open source</strong>; code and deployment guides live on GitHub.
-                        <a href="https://github.com/DOZZZEBOT/DOZZZE" target="_blank" rel="noopener">Check repo progress →</a>
+                        <strong>v0.1 works today</strong> — the node detects your runtime, answers synthesized jobs, and logs $DOZZZE payouts every 30s.
+                        <strong>Coordinator and on-chain settlement are mocked</strong> in this release; real matching + Solana devnet lands in v0.2.
+                        <a href="https://github.com/DOZZZEBOT/DOZZZE/blob/main/docs/architecture.md" target="_blank" rel="noopener">See what's mocked vs. live →</a>
                     </div>
                 </div>
             </div>
@@ -1945,14 +1978,16 @@
         document.querySelector(`.install-panel[data-panel="${tabId}"]`).classList.add('active');
     }
 
-    // Install box: Copy to clipboard
+    // Install box: Copy to clipboard — skips the `$` prompt and trims each line
     function copyCode(btn) {
         const code = btn.parentElement;
-        // Get text excluding the button
-        const text = Array.from(code.childNodes)
-            .filter(n => n !== btn)
-            .map(n => n.textContent)
-            .join('')
+        // Clone so we can mutate without touching the DOM the user sees
+        const clone = code.cloneNode(true);
+        clone.querySelectorAll('.copy-btn, .prompt-sym').forEach(n => n.remove());
+        const text = clone.textContent
+            .split('\n')
+            .map(line => line.replace(/^\s+/, ''))
+            .join('\n')
             .trim();
 
         navigator.clipboard.writeText(text).then(() => {
