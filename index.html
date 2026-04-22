@@ -1556,7 +1556,7 @@
                     <div class="install-tab" data-tab="docker" onclick="switchTab('docker')">
                         <span class="tab-icon">▸</span>Docker
                     </div>
-                    <div class="coming-soon-chip">● v0.1.0 · OPEN SOURCE · LIVE</div>
+                    <div class="coming-soon-chip">● v0.4.0 · OPEN SOURCE · LIVE</div>
                 </div>
 
                 <div class="install-panel active" data-panel="sh">
@@ -1643,9 +1643,8 @@
                 <div class="install-notice">
                     <div class="notice-mark">●</div>
                     <div class="notice-body">
-                        <strong>v0.1 works today</strong> — the node detects your runtime, answers synthesized jobs, and logs $DOZZZE payouts every 30s.
-                        <strong>Coordinator and on-chain settlement are mocked</strong> in this release; real matching + Solana devnet lands in v0.2.
-                        <a href="https://github.com/DOZZZEBOT/DOZZZE/blob/main/docs/architecture.md" target="_blank" rel="noopener">See what's mocked vs. live →</a>
+                        <strong>Open source, self-deploy.</strong> Node detects your local Ollama / LM Studio, polls a real HTTP coordinator with SQLite persistence and bearer auth, and accrues <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">$DOZZZE</code> to your Solana wallet on every completed job. Treasury operators settle on-chain via pump.fun with <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">dozzze-coord distribute</code>.
+                        <a href="https://github.com/DOZZZEBOT/DOZZZE/blob/main/docs/architecture.md" target="_blank" rel="noopener">Read the architecture →</a>
                     </div>
                 </div>
             </div>
@@ -1759,24 +1758,25 @@
                             and run the binary yourself.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status">● v0.1 live · self-deploy</span>
+                            <span class="module-status">● live · self-deploy</span>
                             <span class="module-status" style="color: var(--ink-faint);">· jump to install ↑</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="module" onclick="launch('hunt')" title="See the v0.2 roadmap">
+                <div class="module" onclick="launch('hunt')" title="Open the Discord bot reference consumer">
                     <div class="module-key">[H]</div>
                     <div class="module-body">
                         <div class="module-title">Hunt Alpha <span class="eng">Hunt</span></div>
                         <div class="module-desc">
                             AI-powered memecoin discovery — new token scans, smart money tracking,
-                            contract risk checks, KOL authenticity verdicts. Lands when the real
-                            coordinator does; v0.1 node already handles the inference side.
+                            contract risk checks, KOL authenticity verdicts. Node, coordinator, and
+                            consumer SDK are live; a reference Discord bot ships in <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">examples/</code>.
+                            Build your own alpha workflow on <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">@dozzze/client</code>.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status soon">○ v0.2 · needs the coordinator</span>
-                            <span class="module-status" style="color: var(--ink-faint);">· roadmap on GitHub</span>
+                            <span class="module-status">● infra live · build your own</span>
+                            <span class="module-status" style="color: var(--ink-faint);">· SDK + Discord example →</span>
                         </div>
                     </div>
                 </div>
@@ -1790,7 +1790,7 @@
                             Signal providers earn a cut. Good calls rewarded; bad calls slashed.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status soon">○ v0.3 · design phase</span>
+                            <span class="module-status soon">○ design phase · not yet built</span>
                             <span class="module-status" style="color: var(--ink-faint);">· open discussion on GitHub</span>
                         </div>
                     </div>
@@ -1901,9 +1901,9 @@
                         encrypted with <strong style="color:var(--ink);">scrypt + AES-256-GCM</strong>. The node never uploads it, never ships it
                         to a server, never phones home. Your Solana wallet is your identity; we don't have it.
                         <strong style="color:var(--ink);">BYOK for third-party APIs</strong> (OpenAI, Anthropic, DeepSeek) and
-                        <strong style="color:var(--ink);">subscription bridging</strong> (Claude Pro, ChatGPT Plus) are both deferred
-                        to v0.3 behind an explicit ToS-risk opt-in. A <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">dailyBudgetUsd</code>
-                        cap is already in the config schema — enforcement lands with the bridging flow.
+                        <strong style="color:var(--ink);">subscription bridging</strong> (Claude Pro, ChatGPT Plus) are gated behind
+                        an explicit ToS-risk opt-in and <strong style="color:var(--ink);">not enabled by default</strong>. A <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">dailyBudgetUsd</code>
+                        cap is already in the config schema — enforcement ships with the bridging flow.
                     </div></div>
                 </div>
 
@@ -2028,7 +2028,7 @@
     const MODULE_TARGETS = {
         provide: '#install',
         manual:  'https://github.com/DOZZZEBOT/DOZZZE#readme',
-        hunt:    'https://github.com/DOZZZEBOT/DOZZZE/blob/main/docs/architecture.md#5-layered-swaps-for-v02',
+        hunt:    'https://github.com/DOZZZEBOT/DOZZZE/tree/main/examples/discord-bot',
         vault:   'https://github.com/DOZZZEBOT/DOZZZE/discussions',
     };
 
