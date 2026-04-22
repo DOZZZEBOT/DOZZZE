@@ -20,6 +20,8 @@ export interface RouterDeps {
   settlementKeypair?: Keypair;
   /** Which local runtime to route jobs to. Defaults to Ollama. */
   runtime?: { kind: RuntimeKind; baseUrl: string };
+  /** Node's Solana address — attached to every Result so the coord can credit earnings. */
+  walletAddress?: string;
 }
 
 export interface RouterHandle {
@@ -46,6 +48,9 @@ export function startRouter(deps: RouterDeps): RouterHandle {
         baseUrl: runtime.baseUrl,
         nodeId,
       });
+      if (deps.walletAddress) {
+        result = { ...result, walletAddress: deps.walletAddress };
+      }
 
       // Optional on-chain settlement. Best-effort — we still log the Result
       // and report it back to the coordinator even if settlement fails.

@@ -154,27 +154,56 @@ console.log(result.output);
 `@dozzze/client`. Copy it, swap Discord for Telegram / web app / cron job —
 the SDK is the same.
 
-## Solana devnet settlement (opt-in)
+## Accrual + batch distribution (v0.4, pump.fun-compatible)
 
-v0.2 can memo every completed Result to Solana devnet as a `dozzze:v1:...` payload.
-**Off by default.** To enable:
+The flow built around pump.fun's "you don't control mint" reality:
+
+1. **Nodes accrue.** On every successful `/report`, the coordinator credits
+   the node's wallet in a SQLite ledger (`credited` field in the response
+   shows base units added this tick). Nothing moves on-chain per job.
+
+2. **Anyone can check.** `GET /balance/:address` is public; a node (or a
+   user through a block explorer-style page) sees `{accrued, paid, outstanding}`.
+
+3. **Operator buys + distributes.** When the operator has `$DOZZZE` in a
+   treasury wallet (bought from the pump.fun bonding curve or post-graduation
+   AMM), they run:
+
+   ```bash
+   # 1:1 — send exactly the accrued base units to each address
+   dozzze-coord distribute \
+     --mint <CA> \
+     --treasury-keypair ./treasury.json \
+     --cluster mainnet-beta \
+     --db /var/lib/dozzze/coord.sqlite
+
+   # or proportional — split this pool across everyone by their share
+   dozzze-coord distribute \
+     --mint <CA> \
+     --treasury-keypair ./treasury.json \
+     --cluster mainnet-beta \
+     --db /var/lib/dozzze/coord.sqlite \
+     --pool 1000000000          # 1,000 $DOZZZE at 6 decimals, for example
+   ```
+
+   Always `--dry-run` first to preview. The command creates recipient ATAs
+   on the fly (paid for by the treasury's SOL), chunks transfers to fit
+   under Solana's tx size budget, and marks each row `paid` after on-chain
+   confirmation. Reruns are safe — already-paid amounts are skipped.
+
+## Node-side Solana devnet settlement (optional, independent)
+
+v0.2+ nodes can still memo every Result on devnet as a `dozzze:v1:...`
+proof-of-work string — independent of the treasury distribution above. This
+is the "my node did the work" credential. Off by default:
 
 ```bash
 dozzze config set settlement '{"enabled":true,"cluster":"devnet"}'
-dozzze wallet create          # must have a wallet (funded with devnet airdrop)
+dozzze wallet create
 # either paste the password at the `dozzze start` prompt,
 # or export DOZZZE_WALLET_PASSWORD=... for unattended runs
 dozzze start
 ```
-
-Fund the wallet on devnet:
-
-```
-solana airdrop 1 <address> --url https://api.devnet.solana.com
-```
-
-Every Result then carries `settlementTx: <signature>` you can verify on
-[`explorer.solana.com`](https://explorer.solana.com/?cluster=devnet).
 
 ## Config
 

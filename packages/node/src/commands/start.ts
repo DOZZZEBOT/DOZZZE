@@ -86,10 +86,20 @@ export async function startCmd(opts: { foreground: boolean }): Promise<void> {
     await writePid();
   }
 
+  // Always attach the node's public wallet address to Results so the
+  // coordinator can credit its accrual ledger. Unlocking is NOT required for
+  // this — peekWallet reads the address from the keystore envelope.
+  let walletAddress: string | undefined;
+  if (config.requireWallet) {
+    const info = await peekWallet();
+    if (info) walletAddress = info.address;
+  }
+
   const handle = startRouter({
     config,
     nodeId: config.nodeId,
     runtime: routerRuntime,
+    ...(walletAddress ? { walletAddress } : {}),
     ...(settlementKeypair ? { settlementKeypair } : {}),
   });
 

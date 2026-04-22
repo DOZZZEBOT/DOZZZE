@@ -1,6 +1,6 @@
 {
   "name": "@dozzze/node",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "DOZZZE node client — put your idle compute to work",
   "license": "Apache-2.0",
   "type": "module",
@@ -29,8 +29,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@dozzze/client": "^0.3.0",
-    "@dozzze/sdk": "^0.3.0",
+    "@dozzze/client": "^0.4.0",
+    "@dozzze/sdk": "^0.4.0",
     "@solana/web3.js": "^1.95.3",
     "bip39": "^3.1.0",
     "bs58": "^6.0.0",
