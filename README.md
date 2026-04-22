@@ -8,7 +8,7 @@
   <a href="https://dozzze.xyz"><img src="https://img.shields.io/badge/Website-dozzze.xyz-2d7a6b?style=for-the-badge" alt="Website"></a>
   <a href="https://x.com/DOZZZEBOT"><img src="https://img.shields.io/badge/X-%40DOZZZEBOT-000000?style=for-the-badge&logo=x&logoColor=white" alt="X"></a>
   <a href="https://github.com/DOZZZEBOT/DOZZZE"><img src="https://img.shields.io/badge/GitHub-DOZZZEBOT%2FDOZZZE-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-  <a href="https://pump.fun"><img src="https://img.shields.io/badge/Pump.fun-TBA-9945FF?style=for-the-badge" alt="Pump.fun"></a>
+  <a href="https://pump.fun"><img src="https://img.shields.io/badge/Pump.fun-54vQGeQoLgDQmydAk3gF4pf6pLofAxeqfNPrPQQopump-9945FF?style=for-the-badge" alt="Pump.fun"></a>
 </p>
 
 <p align="center">
