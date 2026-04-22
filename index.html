@@ -1885,9 +1885,13 @@
                         <span class="faq-q-toggle">+</span>
                     </div>
                     <div class="faq-a"><div class="faq-a-inner">
-                        We don't store your raw key. The local node proxies requests through the client — keys never leave your machine.
-                        Same for subscription accounts, done via a local browser extension. You can also set a monthly budget cap;
-                        it auto-trips when exceeded. Worst case: you lose whatever cap amount you set.
+                        Your keystore lives at <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">~/.dozzze/keystore.json</code>,
+                        encrypted with <strong style="color:var(--ink);">scrypt + AES-256-GCM</strong>. The node never uploads it, never ships it
+                        to a server, never phones home. Your Solana wallet is your identity; we don't have it.
+                        <strong style="color:var(--ink);">BYOK for third-party APIs</strong> (OpenAI, Anthropic, DeepSeek) and
+                        <strong style="color:var(--ink);">subscription bridging</strong> (Claude Pro, ChatGPT Plus) are both deferred
+                        to v0.3 behind an explicit ToS-risk opt-in. A <code style="font-size:11px;background:rgba(0,0,0,0.08);padding:1px 5px">dailyBudgetUsd</code>
+                        cap is already in the config schema — enforcement lands with the bridging flow.
                     </div></div>
                 </div>
 
