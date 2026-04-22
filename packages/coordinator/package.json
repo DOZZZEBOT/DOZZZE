@@ -1,6 +1,6 @@
 {
   "name": "@dozzze/coordinator",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "DOZZZE coordinator — minimal HTTP job broker between consumers and nodes",
   "license": "Apache-2.0",
   "type": "module",
@@ -25,8 +25,10 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@dozzze/sdk": "^0.3.0",
+    "@dozzze/sdk": "^0.4.0",
     "@hono/node-server": "^1.13.2",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/web3.js": "^1.95.3",
     "commander": "^12.1.0",
     "hono": "^4.6.5",
     "zod": "^3.23.8"
