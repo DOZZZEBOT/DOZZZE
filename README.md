@@ -1,15 +1,8 @@
 <p align="center">
-  <img src="./assets/logo-512.png" alt="DOZZZE" width="160">
+  <img src="./banner.png" alt="DOZZZE — Idle compute, awake. Your AI subscription sleeps 80% of the day. Dozzze wakes it up, rents it to Solana degens hunting alpha, and pays you in $DOZZZE.">
 </p>
 
 <h1 align="center">DOZZZE</h1>
-
-<p align="center"><em>Idle compute, awake.</em></p>
-
-<p align="center">
-  Your AI subscription sleeps 80% of the day.<br>
-  DOZZZE wakes it up, routes the spare cycles to traders hunting alpha on Solana, and pays you in <code>$DOZZZE</code>.
-</p>
 
 <p align="center">
   <a href="https://dozzze.xyz"><img src="https://img.shields.io/badge/Website-dozzze.xyz-2d7a6b?style=for-the-badge" alt="Website"></a>
