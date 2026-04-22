@@ -91,7 +91,7 @@ describe('sqlite store', () => {
     s.enqueue(j('a'));
     s.enqueue(j('b'));
     s.recordResult(r('z'));
-    expect(s.stats()).toEqual({ pending: 2, completed: 1 });
+    expect(s.stats()).toMatchObject({ pending: 2, completed: 1 });
   });
 
   it('listResults returns every recorded Result', () => {

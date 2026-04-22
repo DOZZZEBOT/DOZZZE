@@ -24,6 +24,8 @@ export interface CoordinatorOptions {
   windowMs?: number;
   /** Max ms /poll will wait for a job before returning {job:null}. Default: 0 = immediate. */
   longPollMs?: number;
+  /** (tokensIn, tokensOut) → accrual amount in base units. */
+  payoutFormula?: (tokensIn: number, tokensOut: number) => number;
 }
 
 /** Build a Hono app. Exported for direct testing with `app.request(...)`. */
@@ -42,6 +44,11 @@ export function createApp(opts: CoordinatorOptions = {}): {
   });
   const longPollMs = Math.max(0, opts.longPollMs ?? 0);
 
+  // Payout formula: base units to credit per (tokensIn, tokensOut). Override
+  // via `opts.payoutFormula` for tests or for a post-token-launch rate card.
+  const payoutFormula =
+    opts.payoutFormula ?? ((tokensIn: number, tokensOut: number) => tokensIn + tokensOut * 2);
+
   app.get('/health', (c) =>
     c.json({
       ok: true,
@@ -50,6 +57,26 @@ export function createApp(opts: CoordinatorOptions = {}): {
       ...store.stats(),
     }),
   );
+
+  // Public read: a node checks its own accrual.
+  app.get('/balance/:address', (c) => {
+    const row = store.getAccrual(c.req.param('address'));
+    if (!row) return c.json({ accrued: 0, paid: 0, outstanding: 0 });
+    return c.json({
+      walletAddress: row.walletAddress,
+      accrued: row.accrued,
+      paid: row.paid,
+      outstanding: Math.max(0, row.accrued - row.paid),
+      ...(row.lastTxSig ? { lastTxSig: row.lastTxSig } : {}),
+      lastAccruedAt: row.lastAccruedAt,
+      ...(row.lastPaidAt ? { lastPaidAt: row.lastPaidAt } : {}),
+    });
+  });
+
+  // Operator read: the whole ledger. Auth-gated when keys configured.
+  app.get('/balances', auth, (c) => {
+    return c.json({ rows: store.listAccruals() });
+  });
 
   // Consumer submits a new job. Auth-gated when keys are configured.
   app.post('/submit', auth, async (c) => {
@@ -92,15 +119,26 @@ export function createApp(opts: CoordinatorOptions = {}): {
     return c.json({ job });
   });
 
-  // Node reports a completed result. Auth-gated.
+  // Node reports a completed result. Auth-gated. If the Result carries a
+  // walletAddress, credit the node's accrual ledger by the configured payout
+  // formula. Nodes without a wallet address are still accepted — their work
+  // is recorded but no payout accrues.
   app.post('/report', auth, async (c) => {
     const raw = await c.req.json().catch(() => null);
     const parsed = ReportRequestSchema.safeParse(raw);
     if (!parsed.success) {
       return c.json({ error: 'invalid report', issues: parsed.error.issues }, 400);
     }
-    store.recordResult(parsed.data.result);
-    return c.json({ accepted: true, result: parsed.data.result }, 201);
+    const result = parsed.data.result;
+    store.recordResult(result);
+    let credited = 0;
+    if (result.walletAddress) {
+      credited = Math.max(0, Math.floor(payoutFormula(result.tokensIn, result.tokensOut)));
+      if (credited > 0) {
+        store.creditEarnings(result.walletAddress, credited, now());
+      }
+    }
+    return c.json({ accepted: true, result, credited }, 201);
   });
 
   // Consumer fetches the result for a job they submitted earlier.

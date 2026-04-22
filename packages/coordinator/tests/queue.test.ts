@@ -61,6 +61,6 @@ describe('queue', () => {
     s.enqueue(j('a'));
     s.enqueue(j('b'));
     s.recordResult(r('x'));
-    expect(s.stats()).toEqual({ pending: 2, completed: 1 });
+    expect(s.stats()).toMatchObject({ pending: 2, completed: 1 });
   });
 });
