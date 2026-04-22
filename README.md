@@ -4,7 +4,7 @@
 > Your AI subscription sleeps 80% of the day. DOZZZE wakes it up, routes the
 > spare cycles to degens hunting alpha on Solana, and pays you in `$DOZZZE`.
 
-[landing page](./index.html) · [quickstart](./docs/quickstart.md) · [architecture](./docs/architecture.md)
+[landing page](./index.html) · [quickstart](./docs/quickstart.md) · [architecture](./docs/architecture.md) · [deployment](./docs/deployment.md)
 
 ---
 
