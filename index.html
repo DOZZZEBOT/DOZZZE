@@ -1533,7 +1533,7 @@
                 </div>
             </div>
 
-            <div class="install-mount">
+            <div class="install-mount" id="install">
                 <div class="install-tabs">
                     <div class="install-tab active" data-tab="sh" onclick="switchTab('sh')">
                         <span class="tab-icon">▸</span>macOS / Linux
@@ -1737,37 +1737,39 @@
             </div>
 
             <div class="modules">
-                <div class="module" onclick="launch('provide')">
+                <div class="module" onclick="launch('provide')" title="Jump to install">
                     <div class="module-key">[P]</div>
                     <div class="module-body">
                         <div class="module-title">Provide Compute <span class="eng">Provide</span></div>
                         <div class="module-desc">
-                            Hook up Claude Pro / ChatGPT Plus subs, API keys, or local LLM nodes — auto-rent when idle.
-                            Paid in $DOZZZE per actual inference. No work, no charge.
+                            Hook up local Ollama / LM Studio — the node runs jobs when your rig is idle
+                            and logs $DOZZZE payouts. No signup, no KYC, no custody. You clone the repo
+                            and run the binary yourself.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status">● Registration open</span>
-                            <span class="module-status" style="color: var(--ink-faint);">· Alpha testing · apply to join</span>
+                            <span class="module-status">● v0.1 live · self-deploy</span>
+                            <span class="module-status" style="color: var(--ink-faint);">· jump to install ↑</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="module" onclick="launch('hunt')">
+                <div class="module" onclick="launch('hunt')" title="See the v0.2 roadmap">
                     <div class="module-key">[H]</div>
                     <div class="module-body">
                         <div class="module-title">Hunt Alpha <span class="eng">Hunt</span></div>
                         <div class="module-desc">
-                            AI-powered memecoin discovery dashboard. New token scans, smart money tracking,
-                            contract risk checks, KOL authenticity verdicts. Live feed, custom agent workflows supported.
+                            AI-powered memecoin discovery — new token scans, smart money tracking,
+                            contract risk checks, KOL authenticity verdicts. Lands when the real
+                            coordinator does; v0.1 node already handles the inference side.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status">● Live signal feed</span>
-                            <span class="module-status" style="color: var(--ink-faint);">· Covers SOL / BASE</span>
+                            <span class="module-status soon">○ v0.2 · needs the coordinator</span>
+                            <span class="module-status" style="color: var(--ink-faint);">· roadmap on GitHub</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="module" onclick="launch('vault')">
+                <div class="module" onclick="launch('vault')" title="Track design discussions on GitHub">
                     <div class="module-key">[V]</div>
                     <div class="module-body">
                         <div class="module-title">Signal Vault <span class="eng">Vault</span></div>
@@ -1776,23 +1778,23 @@
                             Signal providers earn a cut. Good calls rewarded; bad calls slashed.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status soon">○ In development</span>
-                            <span class="module-status" style="color: var(--ink-faint);">· Mechanism being designed</span>
+                            <span class="module-status soon">○ v0.3 · design phase</span>
+                            <span class="module-status" style="color: var(--ink-faint);">· open discussion on GitHub</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="module" onclick="launch('manual')">
+                <div class="module" onclick="launch('manual')" title="Open docs on GitHub">
                     <div class="module-key">[M]</div>
                     <div class="module-body">
                         <div class="module-title">Manual <span class="eng">Manual</span></div>
                         <div class="module-desc">
-                            How it works, node hardware requirements, ToS compliance notes, risk mechanisms.
-                            Docs live alongside the code on GitHub — updated in sync with development.
+                            Quickstart, architecture, contributor guide, security posture.
+                            Written and shipped alongside the code — links out to GitHub.
                         </div>
                         <div class="module-meta">
-                            <span class="module-status offline">● Being written</span>
-                            <span class="module-status" style="color: var(--ink-faint);">· /docs in the GitHub repo</span>
+                            <span class="module-status">● live · README + /docs</span>
+                            <span class="module-status" style="color: var(--ink-faint);">· open on GitHub →</span>
                         </div>
                     </div>
                 </div>
@@ -2006,25 +2008,30 @@
         el.parentElement.classList.toggle('open');
     }
 
+    // Module destinations — external URLs open in a new tab, anchors scroll in-page.
+    const MODULE_TARGETS = {
+        provide: '#install',
+        manual:  'https://github.com/DOZZZEBOT/DOZZZE#readme',
+        hunt:    'https://github.com/DOZZZEBOT/DOZZZE/blob/main/docs/architecture.md#5-layered-swaps-for-v02',
+        vault:   'https://github.com/DOZZZEBOT/DOZZZE/discussions',
+    };
+
     function launch(module) {
-        console.log('launching:', module);
+        const target = MODULE_TARGETS[module];
+        if (!target) return;
+        if (target.startsWith('#')) {
+            const el = document.querySelector(target);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.open(target, '_blank', 'noopener,noreferrer');
+        }
     }
 
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         const key = e.key.toLowerCase();
         const map = { 'p': 'provide', 'h': 'hunt', 'v': 'vault', 'm': 'manual' };
-        if (key === ' ') {
-            e.preventDefault();
-            document.body.style.transition = 'opacity 0.5s';
-            document.body.style.opacity = '0';
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-                alert('Entering the idle pool... (to be wired to real router)');
-            }, 500);
-        } else if (map[key]) {
-            launch(map[key]);
-        }
+        if (map[key]) launch(map[key]);
     });
 
     setInterval(() => {
