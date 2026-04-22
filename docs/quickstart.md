@@ -5,7 +5,7 @@ coordinator, no on-chain settlement, no token yet. This is MVP.
 
 ## Prerequisites
 
-- **Node.js 20+** — `node -v`. If it's older, grab a newer build from
+- **Node.js 22+** — `node -v`. If it's older, grab a newer build from
   [nodejs.org](https://nodejs.org) and re-open your shell.
 - **Ollama** running locally — `ollama serve` in a separate terminal. Pull at
   least one small model:

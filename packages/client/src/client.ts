@@ -1,5 +1,5 @@
 // Consumer SDK. Thin HTTP client around the coordinator's public surface.
-// Zero runtime deps beyond fetch — runs in Node 20+ and any modern browser.
+// Zero runtime deps beyond fetch — runs in Node 22+ and any modern browser.
 
 import {
   PROTOCOL_VERSION,

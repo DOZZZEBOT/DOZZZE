@@ -31,12 +31,12 @@ fail()  { printf '%s×%s %s\n' "$C_RED" "$C_RESET" "$*" >&2; exit 1; }
 
 # ---- Pre-flight --------------------------------------------------------------
 command -v git  >/dev/null 2>&1 || fail "git is required. Install git and re-run."
-command -v node >/dev/null 2>&1 || fail "node.js (>=20) is required. Install from nodejs.org and re-run."
+command -v node >/dev/null 2>&1 || fail "node.js (>=22) is required. Install from nodejs.org and re-run."
 command -v npm  >/dev/null 2>&1 || fail "npm is required (ships with node)."
 
 NODE_MAJOR=$(node -p "process.versions.node.split('.')[0]")
-if [ "$NODE_MAJOR" -lt 20 ]; then
-  fail "node.js >= 20 required, found $(node -v)."
+if [ "$NODE_MAJOR" -lt 22 ]; then
+  fail "node.js >= 22 required, found $(node -v)."
 fi
 
 DOZZZE_PREFIX="${DOZZZE_PREFIX:-$HOME/.dozzze}"

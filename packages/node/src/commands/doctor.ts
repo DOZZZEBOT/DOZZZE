@@ -10,12 +10,12 @@ export async function doctorCmd(): Promise<number> {
   log.banner(['', '  DOZZZE doctor', '']);
   let failures = 0;
 
-  // 1. Node version
+  // 1. Node version — coordinator uses `node:sqlite` which needs 22+.
   const nodeMajor = Number.parseInt(process.versions.node.split('.')[0] ?? '0', 10);
-  if (nodeMajor >= 20) {
-    log.ok(`node.js: ${process.versions.node} (>= 20 OK)`);
+  if (nodeMajor >= 22) {
+    log.ok(`node.js: ${process.versions.node} (>= 22 OK)`);
   } else {
-    log.err(`node.js: ${process.versions.node} — DOZZZE needs Node 20+`);
+    log.err(`node.js: ${process.versions.node} — DOZZZE needs Node 22+`);
     failures += 1;
   }
 

@@ -11,7 +11,7 @@
     "packages/node"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "npm run build -w @dozzze/sdk && npm run build -w @dozzze/client && npm run build -w @dozzze/coordinator && npm run build -w @dozzze/node",
