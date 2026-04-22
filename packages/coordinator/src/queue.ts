@@ -11,6 +11,8 @@ export interface CoordinatorStore {
   listResults(): readonly Result[];
   /** Snapshot counts — handy for health checks / tests. */
   stats(): { pending: number; completed: number };
+  /** Release any underlying resources. No-op for the in-memory store. */
+  close?(): void;
 }
 
 /**
