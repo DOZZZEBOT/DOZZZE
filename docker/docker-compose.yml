@@ -1,0 +1,39 @@
+# Local dev docker-compose for DOZZZE. Assumes Ollama is running on the host
+# (or you've uncommented the `ollama` service below).
+#
+# Quickstart:
+#   docker compose -f docker/docker-compose.yml up --build
+#
+# Then from inside the container:
+#   docker compose exec dozzze dozzze doctor
+services:
+  dozzze:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: dozzze-node:dev
+    restart: unless-stopped
+    volumes:
+      - dozzze-home:/home/dozzze/.dozzze
+    environment:
+      # On Docker Desktop (macOS/Windows) host.docker.internal resolves to the host.
+      # On Linux, either add `--add-host=host.docker.internal:host-gateway` or point
+      # at your host's LAN IP directly.
+      DOZZZE_HOME: /home/dozzze/.dozzze
+      DOZZZE_DEBUG: '0'
+    # Uncomment on Linux if you use host.docker.internal:
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+
+  # Uncomment to run an Ollama sidecar in the same network.
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ollama-data:/root/.ollama
+  #   ports:
+  #     - "11434:11434"
+
+volumes:
+  dozzze-home: {}
+  # ollama-data: {}
