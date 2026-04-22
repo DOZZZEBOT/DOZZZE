@@ -4,7 +4,7 @@
 > Your AI subscription sleeps 80% of the day. DOZZZE wakes it up, routes the
 > spare cycles to degens hunting alpha on Solana, and pays you in `$DOZZZE`.
 
-[landing page](./dozzze-en.html) · [quickstart](./docs/quickstart.md) · [architecture](./docs/architecture.md)
+[landing page](./index.html) · [quickstart](./docs/quickstart.md) · [architecture](./docs/architecture.md)
 
 ---
 
@@ -137,6 +137,6 @@ Please read [`CONTRIBUTING.md`](./CONTRIBUTING.md) before opening a PR. TL;DR:
 
 ## Links
 
-- Website: [dozzze.xyz](https://dozzze.xyz) (when live) / [`./dozzze-en.html`](./dozzze-en.html)
+- Website: [dozzze.xyz](https://dozzze.xyz) (when live) / [`./index.html`](./index.html)
 - X: [@DOZZZEBOT](https://x.com/DOZZZEBOT)
 - GitHub: [DOZZZEBOT/DOZZZE](https://github.com/DOZZZEBOT/DOZZZE)
