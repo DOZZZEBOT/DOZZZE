@@ -25,6 +25,11 @@ export const ResultSchema = z.object({
   jobId: z.string().min(1),
   protocolVersion: z.literal(PROTOCOL_VERSION),
   nodeId: z.string().min(1),
+  /** Solana address the node wants earnings credited to. Required for payouts,
+   *  optional when the node opts out of $DOZZZE (volunteers, testbeds).
+   *  Length is intentionally permissive — the coordinator defers shape
+   *  validation to `new PublicKey(...)` at payout time. */
+  walletAddress: z.string().min(1).max(64).optional(),
   output: z.string(),
   tokensIn: z.number().int().nonnegative(),
   tokensOut: z.number().int().nonnegative(),

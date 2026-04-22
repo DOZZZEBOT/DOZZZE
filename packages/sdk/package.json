@@ -1,6 +1,6 @@
 {
   "name": "@dozzze/sdk",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "DOZZZE protocol — wire schema shared by node clients and coordinators",
   "license": "Apache-2.0",
   "type": "module",
