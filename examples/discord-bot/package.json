@@ -1,0 +1,26 @@
+{
+  "name": "dozzze-discord-bot-example",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Example Discord consumer built on @dozzze/client",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "register": "tsx register-commands.ts",
+    "start": "tsx bot.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dozzze/client": "^0.3.0",
+    "discord.js": "^14.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
