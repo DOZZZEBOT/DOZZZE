@@ -8,18 +8,19 @@
 
 ---
 
-## What this repo is (today, v0.2)
+## What this repo is (today, v0.3)
 
-Three workspaces:
+Four workspaces plus an example:
 
 - **`@dozzze/sdk`** — zod schemas shared by every component. Wire protocol lives here.
-- **`@dozzze/coordinator`** — Hono HTTP broker. `POST /submit`, `GET /poll/:nodeId`, `POST /report`, `GET /result/:jobId`. In-memory FIFO queue.
-- **`@dozzze/node`** — the worker + CLI. Either runs a self-contained mock loop or polls a real coordinator.
+- **`@dozzze/client`** — consumer SDK. `submit`, `getResult`, `awaitResult`, `submitAndAwait`. Works in Node + browser.
+- **`@dozzze/coordinator`** — Hono HTTP broker. FIFO queue, optional SQLite persistence, bearer-token auth, per-key rate limiting, long-poll support.
+- **`@dozzze/node`** — the worker + CLI. Detects Ollama / LM Studio (both now usable as worker targets), polls a coordinator, optionally settles on Solana devnet, includes `dozzze ask` to act as a consumer from the shell.
+- **`examples/discord-bot/`** — reference Discord consumer. Copy + deploy yourself.
 
-v0.2 adds: a real HTTP coordinator (not the in-process mock), a real Solana devnet
-memo settlement path (opt-in), and the ability for multiple nodes to share one
-coordinator. Subscription bridging, SPL token settlement, and consumer dashboards
-are still v0.3+.
+v0.3 focus: everything a production coordinator needs (persistence, auth,
+rate limits, deployable Docker image on GHCR) plus the SDK + example bot that
+let anyone drive real jobs into the mesh. Token launch intentionally deferred.
 
 See [`docs/architecture.md`](./docs/architecture.md) for the exact "live vs. missing"
 list and the component map.
@@ -67,17 +68,20 @@ you're online).
 ## Commands
 
 ```
-dozzze start       # boot the node (creates config on first run)
-dozzze stop        # SIGTERM the running node via its pidfile
-dozzze status      # one-shot: is it running? wallet OK? runtimes up?
-dozzze doctor      # deeper env check; exit 0 if healthy
-dozzze config      # show | get <key> | set <key> <value> | path
-dozzze wallet      # create | show | import | verify
-dozzze --help      # all of the above, commander-style
+dozzze start              # boot the node
+dozzze stop               # SIGTERM the running node
+dozzze status             # one-shot health summary
+dozzze doctor             # deeper env check
+dozzze config             # show | get | set | path
+dozzze wallet             # create | show | import | verify
+dozzze ask "<prompt>"     # submit a prompt as a consumer; print the result
+dozzze --help
 
-# Run a coordinator (v0.2)
-npm run coord      # or: node packages/coordinator/dist/cli.js
+# Coordinator
+npm run coord             # dev (in-memory)
 dozzze-coord --port 8787 --host 127.0.0.1
+dozzze-coord --db /var/lib/dozzze/coord.sqlite        # persistent queue
+DOZZZE_COORD_API_KEYS=k1,k2 dozzze-coord --host 0.0.0.0   # bearer auth + public bind
 ```
 
 ## Run a full mesh locally (v0.2)
@@ -107,6 +111,48 @@ Or run the scripted end-to-end demo (no Ollama required, coordinator + curl only
 ```bash
 bash scripts/demo.sh   # needs jq on PATH
 ```
+
+## Deploy the coordinator (Docker)
+
+Prebuilt image published to GHCR on every push to `main`:
+
+```bash
+docker volume create dozzze-coord
+docker run -d --name dozzze-coord -p 8787:8787 \
+  -v dozzze-coord:/data \
+  -e DOZZZE_COORD_API_KEYS=<your-secret-keys> \
+  -e DOZZZE_COORD_DB=/data/coord.sqlite \
+  ghcr.io/dozzzebot/dozzze-coord:latest
+```
+
+Or build from source:
+
+```bash
+docker build -t dozzze-coord -f docker/coordinator.Dockerfile .
+```
+
+## Use the SDK from your own code
+
+```ts
+import { DozzzeClient } from '@dozzze/client';
+
+const client = new DozzzeClient({
+  url: 'https://coord.example.com',
+  apiKey: process.env.DOZZZE_COORD_API_KEY!,
+});
+
+const result = await client.submitAndAwait(
+  { model: 'llama3.2', prompt: 'What is DOZZZE?', payout: 0.01 },
+  { timeoutMs: 60_000 },
+);
+console.log(result.output);
+```
+
+## Build your own consumer
+
+`examples/discord-bot/` is a reference Discord slash-command bot built on
+`@dozzze/client`. Copy it, swap Discord for Telegram / web app / cron job —
+the SDK is the same.
 
 ## Solana devnet settlement (opt-in)
 
