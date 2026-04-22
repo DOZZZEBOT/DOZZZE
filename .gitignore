@@ -1,0 +1,26 @@
+# DOZZZE — local runtime state must never be committed
+.dozzze/
+node_modules/
+.env
+.env.local
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs / coverage
+*.log
+npm-debug.log*
+coverage/
+.vitest/
+
+# Lockfiles from other package managers (we use npm workspaces)
+pnpm-lock.yaml
+yarn.lock
