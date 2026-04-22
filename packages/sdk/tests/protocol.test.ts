@@ -5,6 +5,8 @@ import {
   parseJob,
   parseResult,
   ResultSchema,
+  SubmitRequestSchema,
+  PollResponseSchema,
 } from '../src/protocol.js';
 
 const validJob = {
@@ -54,7 +56,29 @@ describe('protocol', () => {
     expect(parseResult(validResult).nodeId).toBe('NODE #0069');
   });
 
+  it('allows optional settlementTx on Result', () => {
+    const withTx = { ...validResult, settlementTx: '5Abc...' };
+    expect(parseResult(withTx).settlementTx).toBe('5Abc...');
+  });
+
   it('rejects negative token counts', () => {
     expect(ResultSchema.safeParse({ ...validResult, tokensOut: -1 }).success).toBe(false);
+  });
+
+  it('SubmitRequest omits fields filled in by the coordinator', () => {
+    const req = SubmitRequestSchema.parse({
+      protocolVersion: PROTOCOL_VERSION,
+      kind: 'completion',
+      model: 'llama3.2',
+      prompt: 'Hi',
+      payout: 0.01,
+    });
+    expect(req.maxTokens).toBe(256);
+    expect(req.temperature).toBeCloseTo(0.7);
+  });
+
+  it('PollResponse accepts both job and null', () => {
+    expect(PollResponseSchema.parse({ job: validJob }).job?.id).toBe('j-1');
+    expect(PollResponseSchema.parse({ job: null }).job).toBeNull();
   });
 });
